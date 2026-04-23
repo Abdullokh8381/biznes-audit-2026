@@ -1,0 +1,5 @@
+.DS_Store
+node-v20.12.2-darwin-x64/
+.config/
+.myhome/
+.npm-cache/
