@@ -3,292 +3,717 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biznes Audit 2026 - Tahlil Platformasi</title>
+    <title>ProAudit 2026 - Tizimli Biznes Tahlili</title>
+    
+    <!-- Scripts & Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; margin: 0; overflow-x: hidden; }
-        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .gradient-text { background: linear-gradient(135deg, #a78bfa 0%, #22d3ee 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .gradient-bg { background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%); }
-        .step-transition { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        :root {
+            --primary: #00acc1; 
+            --secondary: #00d4ff;
+            --background: #00acc1; /* Siz yuborgan yorqin Cyan */
+            --card: #ffffff;      /* Oppoq kartochkalar */
+            --card-text: #008899; /* Kartochka ichidagi matn (biroz to'qroq cyan) */
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--background);
+            color: #ffffff;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .glass, .bento-card {
+            background: var(--card) !important;
+            color: var(--card-text) !important;
+            border: none !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass p, .glass span, .glass div, .bento-card h4, .bento-card p, .bento-card span {
+            color: var(--card-text) !important;
+        }
+
+        .text-slate-400, .text-slate-500 {
+            color: rgba(0, 136, 153, 0.7) !important;
+        }
+
+        .option-btn {
+            background: #ffffff !important;
+            color: var(--card-text) !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .option-btn:hover {
+            background: var(--background) !important;
+            transform: translateX(10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-btn:hover *, .option-btn:hover span {
+            color: #ffffff !important;
+        }
+
+        .gradient-bg, .gradient-bg *, button.gradient-bg, button.gradient-bg * {
+            color: #ffffff !important;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00acc1 0%, #00d4ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #00acc1 0%, #007c91 100%);
+        }
+
+        /* Techno Grid Background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0, 172, 193, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 172, 193, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        .btn-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-hover:hover {
+            transform: translateY(-2px) scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        .bento-card {
+            border-radius: 2rem;
+            padding: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .bento-card:hover {
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
         .hidden { display: none; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        @media print {
+            .no-print { display: none; }
+            body { background: white; color: black; }
+            .glass { background: white; border: 1px solid #ddd; box-shadow: none; }
+        }
+
+        .animate-in { animation: slideUp 0.6s ease-out forwards; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Print-specific styles */
+        @media print {
+            body { 
+                background: #00acc1 !important; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+            }
+            #app { padding: 0 !important; }
+            #step-0, #quiz-engine, #header-actions { 
+                display: none !important; 
+            }
+            #dashboard { 
+                display: block !important; 
+                margin: 0 !important;
+                padding: 20px !important;
+            }
+            .glass, .bento-card {
+                background: white !important;
+                color: #008899 !important;
+                box-shadow: none !important;
+                border: 1px solid rgba(0,0,0,0.05) !important;
+                break-inside: avoid;
+            }
+            header { padding-bottom: 40px !important; }
+            header h1 { color: white !important; }
+            .gradient-text { color: #00acc1 !important; -webkit-text-fill-color: initial !important; font-weight: 900; }
+        }
     </style>
 </head>
 <body>
-    <div id="app" class="min-h-screen p-4 md:p-8 flex items-center justify-center relative">
-        <!-- Decor -->
-        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/20 blur-[120px] rounded-full"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-600/20 blur-[120px] rounded-full"></div>
+    <div id="app" class="min-h-screen relative p-4 md:p-8 flex flex-col items-center">
+        <!-- Abstract Background -->
+        <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        </div>
 
-        <div id="quiz-container" class="max-w-2xl w-full z-10 animate-fade-in">
-            <div class="mb-10 text-center">
-                <h1 class="text-4xl font-extrabold mb-2 gradient-text">Biznes Audit 2026</h1>
-                <p class="text-slate-400">Marketing va moliya tizimingizni 5 daqiqada tahlil qiling</p>
-            </div>
-
-            <!-- Progress Bar -->
-            <div id="progress-wrapper" class="mb-8 hidden">
-                <div class="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                    <div id="progress-bar" class="h-full gradient-bg step-transition" style="width: 0%"></div>
+        <!-- Header -->
+        <header class="w-full max-w-6xl flex justify-between items-center mb-12 z-10 no-print">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-black/10">
+                    <i data-lucide="activity" class="text-[#00acc1] w-6 h-6"></i>
                 </div>
-                <div class="flex justify-between mt-2 text-xs text-slate-500 uppercase tracking-widest">
-                    <span id="section-name">Umumiy holat</span>
-                    <span id="step-counter">1 / 12</span>
-                </div>
+                <h1 class="text-2xl font-black tracking-tight text-white">ProAudit</h1>
             </div>
+            <div id="header-actions" class="hidden"></div>
+        </header>
 
-            <!-- Quiz Content -->
-            <div id="quiz-content" class="glass p-8 md:p-12 rounded-[2.5rem] shadow-2xl">
-                <!-- Start Screen -->
-                <div id="start-screen" class="text-center">
-                    <div class="text-6xl mb-6">📊</div>
-                    <h2 class="text-2xl font-bold mb-6">Biznesingizni audit qilishga tayyormisiz?</h2>
-                    <p class="text-slate-400 mb-10 leading-relaxed">
-                        Biznesingizdagi "teshik"larni aniqlang, lid narxini prognoz qiling va yiliga qancha foyda boy berayotganingizni bilib oling.
-                    </p>
-                    <button onclick="startQuiz()" class="w-full py-5 gradient-bg rounded-2xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-lg shadow-purple-500/25">
+        <!-- Main Content Area -->
+        <main class="w-full max-w-4xl z-10">
+            
+            <!-- Lead Magnet / Start Screen -->
+            <div id="step-0" class="glass p-10 md:p-20 text-center rounded-[3rem] animate-in">
+                <div class="w-24 h-24 gradient-bg rounded-3xl mx-auto mb-10 flex items-center justify-center shadow-2xl shadow-cyan-500/20">
+                    <i data-lucide="bar-chart-3" class="w-12 h-12 text-white"></i>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-black mb-6 leading-tight">Biznesingizni <br> <span class="gradient-text">Professionallar</span> kabi audit qiling</h2>
+                <p class="text-slate-400 text-lg mb-12 max-w-lg mx-auto leading-relaxed">
+                    Ushbu tizim sizning marketing, sotuv va moliya ko'rsatkichlaringizni tahlil qilib, 2026-yil uchun o'sish rejasini taqdim etadi.
+                </p>
+                <div class="max-w-md mx-auto space-y-4">
+                    <input id="userName" type="text" onkeypress="if(event.key === 'Enter') startAudit()" placeholder="Ismingiz yoki Kompaniya nomi" class="w-full p-5 glass rounded-2xl focus:outline-none focus:border-cyan-500 transition-all text-center text-lg">
+                    <button onclick="startAudit()" class="w-full py-5 gradient-bg rounded-2xl font-black text-xl btn-hover shadow-xl shadow-cyan-500/25">
                         Auditni boshlash
                     </button>
                 </div>
+            </div>
 
-                <!-- Questions (will be injected) -->
-                <div id="question-screen" class="hidden">
-                    <h2 id="question-text" class="text-2xl md:text-3xl font-semibold mb-10 leading-tight">Savol kutilmoqda...</h2>
-                    <div id="options-container" class="space-y-4"></div>
+            <!-- Quiz Engine -->
+            <div id="quiz-engine" class="hidden w-full">
+                <!-- Progress bar -->
+                <div class="mb-12">
+                    <div class="h-1.5 w-full bg-white rounded-full overflow-hidden">
+                        <div id="progress-bar" class="h-full bg-yellow-400 transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between mt-3 px-2">
+                        <span id="section-name" class="text-xs uppercase font-bold text-white tracking-widest opacity-90">Infratuzilma</span>
+                        <span id="step-counter" class="text-xs font-bold text-white">1 / 13</span>
+                    </div>
+                </div>
+
+                <div id="question-card" class="glass p-8 pt-16 md:p-14 md:pt-20 rounded-[3rem] transition-all duration-300 relative">
+                    <!-- Back Button -->
+                    <button id="back-btn" onclick="goBack()" class="absolute top-4 left-4 md:top-6 md:left-6 p-3 bg-[#00acc1] rounded-xl hover:brightness-110 transition-all group z-20">
+                        <i data-lucide="arrow-left" class="w-5 h-5 text-white"></i>
+                    </button>
+
+                    <h3 id="question-text" class="text-2xl md:text-4xl font-bold mb-12 leading-tight">...</h3>
+                    
+                    <div id="options-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Options injected here -->
+                    </div>
+
+                    <div id="multi-next-container" class="hidden mt-8 pt-8 border-t border-slate-100">
+                        <button onclick="handleMultiNext()" class="w-full py-6 gradient-bg rounded-2xl font-black text-xl btn-hover shadow-xl shadow-cyan-500/20">Keyingi qadam</button>
+                    </div>
+
                     <div id="input-container" class="hidden space-y-6">
-                        <input id="number-input" type="number" class="w-full p-5 bg-slate-900/50 border border-slate-700 rounded-2xl text-2xl focus:outline-none focus:border-purple-500 transition-all" placeholder="0">
-                        <button id="next-btn" class="w-full py-5 gradient-bg rounded-2xl font-bold text-lg hover:scale-105 transition-all">Keyingi qadam</button>
+                        <input id="num-input" type="number" onkeypress="if(event.key === 'Enter') handleNextStep()" class="w-full p-6 glass rounded-2xl text-3xl font-bold focus:outline-none focus:border-cyan-500 text-center" placeholder="0">
+                        <p id="input-hint" class="text-center text-slate-500 text-sm">Masalan: 10,000</p>
+                        <button onclick="handleNextStep()" class="w-full py-6 gradient-bg rounded-2xl font-black text-xl btn-hover">Keyingi qadam</button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Result Dashboard (Hidden by default) -->
-        <div id="result-dashboard" class="max-w-6xl w-full z-10 hidden mt-10 md:mt-0 p-4">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
-                <div>
-                    <h1 class="text-4xl font-black gradient-text mb-2">Audit Natijasi 📊</h1>
-                    <p class="text-slate-400">Biznesingizning moliyaviy va marketing tahlili</p>
-                </div>
-                <div class="flex gap-4">
-                    <button onclick="window.print()" class="px-6 py-3 glass rounded-xl hover:bg-white/5 transition-all font-semibold">Yuklab olish</button>
-                    <button onclick="location.reload()" class="px-6 py-3 gradient-bg rounded-xl font-bold hover:scale-105 transition-all">Qaytadan boshlash</button>
-                </div>
-            </div>
+        </main>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <!-- Risk Card -->
-                <div id="risk-card" class="glass p-8 rounded-[2rem] relative overflow-hidden">
-                    <div id="risk-blob" class="absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-20"></div>
-                    <h3 class="text-xs uppercase tracking-widest font-bold text-slate-500 mb-4">Xavf Darajasi</h3>
-                    <div id="risk-icon" class="text-6xl mb-4">🔴</div>
-                    <div id="risk-label" class="text-3xl font-black mb-2">Yuqori</div>
-                    <p id="penalty-desc" class="text-sm text-slate-500">Tizimingizda 40% yo'qotishlar mavjud.</p>
-                </div>
-
-                <!-- CRM Card -->
-                <div class="glass p-8 rounded-[2rem]">
-                    <h3 class="text-xs uppercase tracking-widest font-bold text-slate-500 mb-6">Infratuzilma</h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-400">CRM:</span>
-                            <span id="res-crm" class="px-3 py-1 bg-red-500/20 text-red-500 rounded-full text-xs font-bold">❌ Yo'q</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-400">Sotuv bo'limi:</span>
-                            <span id="res-sales" class="px-3 py-1 bg-red-500/20 text-red-500 rounded-full text-xs font-bold">❌ Yo'q</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-400">Tarmoqlar:</span>
-                            <span id="res-social" class="font-bold text-cyan-400">A'lo</span>
+        <!-- Result Dashboard (Bento Grid) -->
+        <div id="dashboard" class="hidden w-full max-w-6xl z-10 animate-in">
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <div class="glass bento-card md:col-span-2 relative overflow-hidden">
+                    <div id="risk-light" class="absolute top-0 right-0 w-32 h-32 blur-[80px] opacity-20"></div>
+                    <p class="text-xs font-bold text-slate-500 mb-4 tracking-widest uppercase">Umumiy Holat</p>
+                    <div class="flex items-end gap-4">
+                        <div id="risk-score" class="text-7xl font-black">84%</div>
+                        <div class="pb-2">
+                            <p id="risk-status" class="text-xl font-bold text-red-500">Kritik</p>
+                            <p class="text-sm text-slate-500">Samaradorlik xavfi</p>
                         </div>
                     </div>
                 </div>
-
-                <!-- Gap Card -->
-                <div class="glass p-8 rounded-[2rem]">
-                    <h3 class="text-xs uppercase tracking-widest font-bold text-slate-500 mb-6">Moliyaviy Farq</h3>
-                    <div id="res-gap" class="text-5xl font-black text-purple-500 mb-2">$0</div>
-                    <p class="text-sm text-slate-500">Maqsadga erishish uchun yana shuncha oylik aylanma kerak.</p>
+                <div class="glass bento-card">
+                    <p class="text-xs font-bold text-slate-500 mb-4 uppercase">Moliyaviy Gap</p>
+                    <div id="dash-gap" class="text-4xl font-black text-cyan-400">$6,000</div>
+                    <p class="text-xs text-slate-500 mt-2">Maqsadgacha masofa</p>
+                </div>
+                <div class="glass bento-card">
+                    <p class="text-xs font-bold text-slate-500 mb-4 uppercase">ROAS Prognoz</p>
+                    <div id="dash-roas" class="text-4xl font-black text-purple-400">x5.2</div>
+                    <p class="text-xs text-slate-500 mt-2">Kutilayotgan samaradorlik</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <!-- Funnel -->
-                <div class="glass p-10 rounded-[2rem]">
-                    <h3 class="text-2xl font-bold mb-8 flex items-center gap-2">📈 Funnel Hisob-kitobi</h3>
+            <!-- Main Bento Area -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <!-- Funnel Table -->
+                <div class="glass bento-card md:col-span-2">
+                    <h4 class="text-xl font-bold mb-8">📈 Funnel va Konversiya Tahlili</h4>
                     <div class="space-y-6">
-                        <div class="flex justify-between border-b border-slate-800 pb-4">
-                            <span class="text-slate-400">Konversiya:</span>
-                            <span id="res-conv" class="font-bold">30%</span>
+                        <div class="flex justify-between border-b border-white/5 pb-4">
+                            <span class="text-slate-400">Sotuv konversiyasi:</span>
+                            <span id="dash-conv" class="font-bold">30%</span>
                         </div>
-                        <div class="flex justify-between border-b border-slate-800 pb-4">
-                            <span class="text-slate-400">Kerakli mijozlar:</span>
-                            <span id="res-cust" class="font-bold text-cyan-400">167 ta</span>
+                        <div class="flex justify-between border-b border-white/5 pb-4">
+                            <span class="text-slate-400">Lidlar oqimi (Oyiga):</span>
+                            <span id="dash-leads" class="font-bold">540 ta</span>
                         </div>
-                        <div class="flex justify-between pt-2">
-                            <span class="text-lg font-bold">Kerakli lidlar (Zayavka):</span>
-                            <span id="res-leads" class="text-3xl font-black text-purple-500">557 ta</span>
+                        <div class="flex justify-between items-center pt-2">
+                            <div>
+                                <span class="text-slate-400 text-sm">Kerakli mijozlar:</span>
+                                <p id="dash-customers" class="text-2xl font-black text-cyan-400">162 ta</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-slate-400 text-sm">Lid narxi (CPL):</span>
+                                <p id="dash-cpl" class="text-2xl font-black text-purple-400">$1.20</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Budget -->
-                <div class="glass p-10 rounded-[2rem] border border-purple-500/20 bg-purple-500/5">
-                    <h3 class="text-2xl font-bold mb-8">💰 Reklama Byudjeti</h3>
-                    <div class="grid grid-cols-2 gap-6 mb-8">
-                        <div class="p-6 glass rounded-2xl text-center">
-                            <p class="text-xs text-slate-500 uppercase mb-2 font-bold">Minimal</p>
-                            <p id="res-budget-min" class="text-2xl font-black">$600</p>
-                        </div>
-                        <div class="p-6 gradient-bg rounded-2xl text-center shadow-lg shadow-purple-500/20">
-                            <p class="text-xs text-white/60 uppercase mb-2 font-bold">Optimal</p>
-                            <p id="res-budget-opt" class="text-2xl font-black">$1,100</p>
-                        </div>
+                <!-- Budget Card -->
+                <div class="glass bento-card gradient-bg !border-none flex flex-col justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-white/50 mb-6 uppercase">Optimal Byudjet</p>
+                        <div id="dash-budget" class="text-6xl font-black text-white">$1,100</div>
+                        <p class="text-sm text-white/70 mt-4 leading-relaxed">
+                            Ushbu byudjet sizning moliyaviy maqsadingizga erishish uchun minimal tavsiya etilgan investitsiya.
+                        </p>
                     </div>
-                    <div class="p-6 bg-red-500/10 border border-red-500/20 rounded-2xl">
-                        <div class="flex justify-between text-xs text-red-500 font-bold uppercase mb-2">
-                            <span>Real Byudjet</span>
-                            <span id="res-penalty-pct">+40% jarima</span>
-                        </div>
-                        <p id="res-budget-real" class="text-4xl font-black text-red-500">$1,500</p>
+                    <div class="p-4 bg-white/10 rounded-2xl flex items-center gap-3">
+                         <i data-lucide="trending-up" class="w-5 h-5 text-white"></i>
+                         <span id="dash-platform" class="text-xs font-bold text-white uppercase">Instagram Ads</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Lost Opportunity -->
-            <div class="p-12 rounded-[2.5rem] bg-red-600/10 border border-red-600/20 text-center mb-8">
-                <p class="text-red-500/60 uppercase tracking-[0.3em] font-bold text-sm mb-4">Foydadan ayrilishingiz</p>
-                <p class="text-xl mb-4">Siz tizimsizlik tufayli yiliga o'rtacha</p>
-                <div id="res-lost" class="text-6xl md:text-8xl font-black text-red-600 mb-6">$0</div>
-                <p class="text-xl">miqdorida sof foydani qo'ldan boy beryapsiz.</p>
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="glass bento-card">
+                    <h4 class="text-lg font-bold mb-6">Hozirgi vs Maqsadli Daromad</h4>
+                    <canvas id="revenueChart" height="200"></canvas>
+                </div>
+                <div class="glass bento-card">
+                    <h4 class="text-lg font-bold mb-6">Soha Benchmarklari (CPL)</h4>
+                    <canvas id="benchmarkChart" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Roadmap & Lost Revenue -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass bento-card md:col-span-2">
+                    <h4 class="text-xl font-bold mb-8">🚀 Strategik Yo'l Xaritasi (Roadmap)</h4>
+                    <div id="roadmap-list" class="space-y-6">
+                        <!-- Injected -->
+                    </div>
+                </div>
+
+                <div class="glass bento-card bg-red-600/5 !border-red-600/20 text-center">
+                    <p class="text-red-500 font-bold uppercase text-[10px] tracking-widest mb-6 tracking-[3px]">Loss Analysis</p>
+                    <p class="text-slate-400 mb-2">Tizimsizlik narxi (Yillik):</p>
+                    <div id="dash-lost" class="text-5xl font-black text-red-600 mb-6">$48,000</div>
+                    <p class="text-xs text-slate-500 leading-relaxed px-4">
+                        CRM va tezkor javob bo'lmagani uchun siz shu miqdordagi sof foydani qo'ldan boy beryapsiz.
+                    </p>
+                    <div class="mt-8 pt-8 border-t border-red-600/10">
+                        <p class="text-xs font-bold text-red-500/60 mb-2">SAMARADORLIK JARIMASI</p>
+                        <div id="dash-penalty-pct" class="text-3xl font-black text-red-500">+45%</div>
+                    </div>
+                </div>
             </div>
         </div>
+
     </div>
 
+    <!-- Hidden Report Container for jspdf -->
+    <div id="pdf-container" class="fixed top-[-9999px] left-[-9999px] w-[800px] p-10 bg-slate-900"></div>
+
     <script>
+        // Init Lucide
+        lucide.createIcons();
+
+        // Constants
         const QUESTIONS = [
-            { id: 'hasCRM', text: 'Sizda CRM tizimi mavjudmi?', type: 'select', opts: [{l: 'Ha, mavjud', v: 'yes'}, {l: 'Yo\'q, Excel/Qog\'ozda', v: 'no', p: 0.2}], s: 'Biznes Holati' },
-            { id: 'salesTeam', text: 'Alohida sotuv bo\'limi bormi?', type: 'select', opts: [{l: 'Ha, menejerlar bor', v: 'yes'}, {l: 'Yo\'q, o\'zim sotaman', v: 'no', p: 0.2}], s: 'Biznes Holati' },
-            { id: 'socialState', text: 'Ijtimoiy tarmoqlarning holati?', type: 'select', opts: [{l: 'Juda zo\'r', v: '3'}, {l: 'Yaxshi', v: '2'}, {l: 'Yomon', v: '1'}], s: 'Marketing' },
-            { id: 'speedToLead', text: 'Mijozga javob berish tezligi?', type: 'select', opts: [{l: '< 5 daqiqa', v: 'fast'}, {l: '1 soat ichida', v: 'mid'}, {l: '1 kun ichida', v: 'slow', p: 0.3}], s: 'Marketing' },
-            { id: 'platform', text: 'Asosiy reklama maydoni?', type: 'select', opts: [{l: 'Instagram', v: 'insta'}, {l: 'Facebook', v: 'fb'}, {l: 'Google', v: 'google'}, {l: 'Telegram', v: 'tg'}], s: 'Marketing' },
-            { id: 'currentRev', text: 'Hozirgi oylik daromad? ($)', type: 'number', placeholder: '2000', s: 'Moliya' },
+            { id: 'isOwner', text: 'Siz biznes egasimisiz?', type: 'select', options: [{l: 'Ha, egasiman', v: 'yes'}, {l: 'Yangi boshlayapman', v: 'no'}], s: 'Subyekt' },
+            { id: 'hasCRM', text: 'Sizda CRM tizimi (Bitrix24/AmoCRM) bormi?', type: 'select', options: [{l: 'Ha, hammasi joyida', v: 'yes'}, {l: 'Yo\'q, Excel yoki Qog\'ozda', v: 'no', p: 0.2}], s: 'Infratuzilma' },
+            { id: 'hasSales', text: 'Alohida sotuv bo\'limi (menejerlar) bormi?', type: 'select', options: [{l: 'Ha, komanda bor', v: 'yes'}, {l: 'Yo\'q, o\'zim sotaman', v: 'no', p: 0.15}], s: 'Sotuv' },
+            { id: 'socialState', text: 'Ijtimoiy tarmoqlarning holati?', type: 'select', options: [{l: 'Profil juda professional', v: 'top'}, {l: 'O\'rtacha holatda', v: 'mid'}, {l: 'Holati yomon (yoki yo\'q)', v: 'low', p: 0.1}], s: 'Marketing' },
+            { id: 'industry', text: 'Biznesingiz qaysi sohada?', type: 'select', options: [
+                {l: 'Savdo (E-com)', v: 'retail'}, 
+                {l: 'Xizmat ko\'rsatish', v: 'service'}, 
+                {l: 'O\'quv markazi / EdTech', v: 'edu'}, 
+                {l: 'Ishlab chiqarish', v: 'factory'},
+                {l: 'Konsalting / Agentlik', v: 'consult'},
+                {l: 'IT / Dasturlash', v: 'it'},
+                {l: 'Tibbiyot / Klinika', v: 'med'},
+                {l: 'HORECA (Restoran/Kafe)', v: 'food'},
+                {l: 'Logistika', v: 'logistics'},
+                {l: 'Qurilish / Ko\'chmas mulk', v: 'const'},
+                {l: 'Boshqa', v: 'other'}
+            ], s: 'Soha' },
+            { id: 'platform', text: 'Asosiy reklama platformangiz qaysi?', type: 'select', multi: true, options: [{l: 'Instagram', v: 'insta'}, {l: 'Facebook', v: 'fb'}, {l: 'Google Ads', v: 'google'}, {l: 'Telegram', v: 'tg'}], s: 'Marketing' },
+            { id: 'currentRev', text: 'Hozirgi oylik aylanma? ($)', type: 'number', placeholder: '2000', s: 'Moliya' },
             { id: 'targetRev', text: 'Oylik DAROMAD maqsadingiz? ($)', type: 'number', placeholder: '10000', s: 'Moliya' },
-            { id: 'avgCheck', text: 'O\'rtacha chek qancha? ($)', type: 'number', placeholder: '50', s: 'Moliya' },
-            { id: 'conversion', text: 'Sotuv konversiyasi? (%)', type: 'number', placeholder: '25', s: 'Moliya' }
+            { id: 'avgCheck', text: 'O\'rtacha chek miqdori? ($)', type: 'number', placeholder: '50', s: 'Moliya' },
+            { id: 'conversion', text: 'Sotuv konversiyasi necha foiz? (%)', type: 'number', placeholder: '25', s: 'Moliya' },
+            { id: 'ltv', text: 'Mijoz 1 yilda o\'rtacha necha marta sotib oladi?', type: 'number', placeholder: '1', s: 'Metrika' },
+            { id: 'currentCPL', text: 'Hozirda 1 ta lid (so\'rov) sizga necha pulga tushmoqda? ($)', type: 'number', placeholder: '1.5', s: 'Marketing' },
+            { id: 'speedToLead', text: 'Mijozga birinchi javob berish tezligi?', type: 'select', options: [{l: '< 5 daqiqa (Tezkor)', v: 'fast'}, {l: '1 soat ichida', v: 'med', p: 0.1}, {l: '1 kun ichida', v: 'slow', p: 0.3}], s: 'Sotuv' }
         ];
 
-        const BENCHMARKS = { insta: [0.8, 1.2], fb: [0.9, 1.5], google: [2, 5], tg: [0.5, 1] };
+        const BENCHMARKS = {
+            retail: [0.8, 1.2, 3.0, 0.6],
+            service: [1.2, 1.8, 4.0, 1.0],
+            edu: [1.0, 1.5, 3.5, 0.8],
+            factory: [5.0, 8.0, 15.0, 4.0],
+            consult: [3.0, 5.0, 10.0, 2.5],
+            it: [4.0, 6.0, 12.0, 3.0],
+            med: [2.0, 3.5, 8.0, 1.5],
+            food: [0.5, 0.9, 2.5, 0.4],
+            logistics: [2.5, 4.0, 9.0, 2.0],
+            const: [6.0, 10.0, 20.0, 5.0],
+            other: [1.0, 1.5, 4.0, 1.0]
+        };
 
-        let step = 0;
-        let data = {};
+        const PLATFORM_DATA = {
+            insta: { name: 'Instagram', min: 0.8, max: 1.2 },
+            fb: { name: 'Facebook', min: 1.0, max: 1.8 },
+            google: { name: 'Google', min: 2.5, max: 6.0 },
+            tg: { name: 'Telegram', min: 0.5, max: 1.0 }
+        };
 
-        function startQuiz() {
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('progress-wrapper').classList.remove('hidden');
-            document.getElementById('question-screen').classList.remove('hidden');
-            showQuestion();
+        let currentStep = 0;
+        let auditData = {};
+
+        // UI Handlers
+        function startAudit() {
+            const name = document.getElementById('userName').value;
+            if(!name) { alert('Iltimos, ismingizni kiriting!'); return; }
+            auditData.userName = name;
+            
+            document.getElementById('step-0').classList.add('hidden');
+            document.getElementById('quiz-engine').classList.remove('hidden');
+            renderQuestion();
         }
 
-        function showQuestion() {
-            const q = QUESTIONS[step];
-            document.getElementById('question-text').innerText = q.text;
-            document.getElementById('section-name').innerText = q.s;
-            document.getElementById('step-counter').innerText = `${step + 1} / ${QUESTIONS.length}`;
-            document.getElementById('progress-bar').style.width = `${((step + 1) / QUESTIONS.length) * 100}%`;
+        function renderQuestion() {
+            const q = QUESTIONS[currentStep];
+            const quizCard = document.getElementById('question-card');
+            const backBtn = document.getElementById('back-btn');
+            
+            // Back button always visible to allow going back to start
+            backBtn.classList.remove('hidden');
 
-            const optsCont = document.getElementById('options-container');
-            const inputCont = document.getElementById('input-container');
-            optsCont.innerHTML = '';
+            // Fade effect
+            quizCard.style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('question-text').innerText = q.text;
+                document.getElementById('section-name').innerText = q.s;
+                document.getElementById('step-counter').innerText = `${currentStep + 1} / ${QUESTIONS.length}`;
+                document.getElementById('progress-bar').style.width = `${((currentStep + 1) / QUESTIONS.length) * 100}%`;
 
-            if (q.type === 'select') {
-                inputCont.classList.add('hidden');
-                optsCont.classList.remove('hidden');
-                q.opts.forEach(o => {
-                    const btn = document.createElement('button');
-                    btn.className = 'w-full p-5 glass rounded-2xl text-left hover:gradient-bg hover:translate-x-2 transition-all duration-300 font-semibold';
-                    btn.innerText = o.l;
-                    btn.onclick = () => next(o.v);
-                    optsCont.appendChild(btn);
+                const optionsGrid = document.getElementById('options-grid');
+                const inputCont = document.getElementById('input-container');
+                
+                optionsGrid.innerHTML = '';
+                
+                if(q.type === 'select') {
+                    inputCont.classList.add('hidden');
+                    optionsGrid.classList.remove('hidden');
+                    
+                    if(q.multi) {
+                        document.getElementById('multi-next-container').classList.remove('hidden');
+                        if(!auditData[q.id]) auditData[q.id] = [];
+                    } else {
+                        document.getElementById('multi-next-container').classList.add('hidden');
+                    }
+
+                    q.options.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = 'w-full p-6 glass rounded-2xl text-left font-semibold flex justify-between items-center group option-btn';
+                        
+                        // Check if selected
+                        const isSelected = q.multi ? auditData[q.id].includes(opt.v) : auditData[q.id] === opt.v;
+                        if(isSelected) btn.classList.add('!bg-[#00acc1]', '!text-white', 'border-[#00acc1]');
+                        
+                        btn.innerHTML = `<span class="transition-colors">${opt.l}</span> <i data-lucide="chevron-right" class="w-5 h-5 opacity-0 group-hover:opacity-100 transition-all"></i>`;
+                        
+                        btn.onclick = (e) => {
+                            if(opt.v === 'other') {
+                                // Don't proceed yet, show input
+                                btn.innerHTML = `<span class="flex items-center gap-2">Boshqa: <input type="text" id="other-industry" class="bg-transparent border-b border-cyan-500 outline-none w-32 md:w-64 text-cyan-700 font-bold" placeholder="Sohangizni yozing..." onkeypress="if(event.key === 'Enter') { auditData.otherIndustry = this.value; saveValue('industry', 'other'); }"></span>`;
+                                btn.classList.add('md:col-span-2'); // Expand for input
+                                btn.onclick = null; // Prevent double click
+                                const input = btn.querySelector('input');
+                                input.focus();
+                                e.stopPropagation();
+                                return;
+                            }
+                            
+                            if(q.multi) {
+                                if(auditData[q.id].includes(opt.v)) {
+                                    auditData[q.id] = auditData[q.id].filter(v => v !== opt.v);
+                                    btn.classList.remove('!bg-[#00acc1]', '!text-white');
+                                } else {
+                                    auditData[q.id].push(opt.v);
+                                    btn.classList.add('!bg-[#00acc1]', '!text-white');
+                                }
+                                lucide.createIcons();
+                            } else {
+                                saveValue(q.id, opt.v);
+                            }
+                        };
+                        optionsGrid.appendChild(btn);
+                    });
+                    lucide.createIcons();
+                } else {
+                    optionsGrid.classList.add('hidden');
+                    inputCont.classList.remove('hidden');
+                    const numInput = document.getElementById('num-input');
+                    numInput.value = auditData[q.id] || '';
+                    numInput.placeholder = q.placeholder;
+                    numInput.focus();
+                }
+                quizCard.style.opacity = '1';
+            }, 200);
+        }
+
+        function goBack() {
+            if(currentStep > 0) {
+                currentStep--;
+                renderQuestion();
+            } else {
+                document.getElementById('quiz-engine').classList.add('hidden');
+                document.getElementById('step-0').classList.remove('hidden');
+            }
+        }
+
+        function handleNextStep() {
+            const val = document.getElementById('num-input').value;
+            if(!val) return;
+            saveValue(QUESTIONS[currentStep].id, parseFloat(val));
+        }
+
+        function handleMultiNext() {
+            const q = QUESTIONS[currentStep];
+            if(!auditData[q.id] || auditData[q.id].length === 0) {
+                alert('Iltimos, kamida bitta platformani tanlang!');
+                return;
+            }
+            saveValue(q.id, auditData[q.id]);
+        }
+
+        function saveValue(key, val) {
+            auditData[key] = val;
+            document.getElementById('multi-next-container').classList.add('hidden');
+            if(currentStep < QUESTIONS.length - 1) {
+                currentStep++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-engine').classList.add('hidden');
+            document.getElementById('header-actions').classList.remove('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            
+            calculateMetrics();
+            renderCharts();
+            renderRoadmap();
+        }
+
+        function calculateMetrics() {
+            const tRev = auditData.targetRev;
+            const cRev = auditData.currentRev;
+            const avgCheck = auditData.avgCheck;
+            const conv = auditData.conversion / 100 || 0.1;
+            
+            // Handle Multi-Platform Benchmark
+            let platform;
+            if(Array.isArray(auditData.platform)) {
+                // Average the benchmarks
+                let minSum = 0, maxSum = 0, names = [];
+                auditData.platform.forEach(p => {
+                    const b = PLATFORM_DATA[p] || PLATFORM_DATA.insta;
+                    minSum += b.min;
+                    maxSum += b.max;
+                    names.push(b.name);
                 });
-            } else {
-                optsCont.classList.add('hidden');
-                inputCont.classList.remove('hidden');
-                document.getElementById('number-input').value = '';
-                document.getElementById('number-input').placeholder = q.placeholder;
-                document.getElementById('next-btn').onclick = () => {
-                    const v = document.getElementById('number-input').value;
-                    if (v) next(Number(v));
+                platform = {
+                    min: minSum / auditData.platform.length,
+                    max: maxSum / auditData.platform.length,
+                    name: names.join(', ')
                 };
-            }
-        }
-
-        function next(v) {
-            data[QUESTIONS[step].id] = v;
-            if (step < QUESTIONS.length - 1) {
-                step++;
-                showQuestion();
             } else {
-                calculate();
+                platform = PLATFORM_DATA[auditData.platform] || PLATFORM_DATA.insta;
             }
-        }
-
-        function calculate() {
-            const tRev = data.targetRev;
-            const cRev = data.currentRev;
-            const avgCheck = data.avgCheck;
-            const conv = data.conversion / 100 || 0.1;
-            const b = BENCHMARKS[data.platform] || [0.8, 1.2];
-
-            // Penalties
+            
+            // Dynamic Penalty Calculation
             let penalty = 0;
-            if (data.hasCRM === 'no') penalty += 0.2;
-            if (data.salesTeam === 'no') penalty += 0.2;
-            if (data.speedToLead === 'slow') penalty += 0.3;
+            QUESTIONS.forEach(q => {
+                if(q.options) {
+                    const selected = q.options.find(o => o.v === auditData[q.id]);
+                    if(selected && selected.p) penalty += selected.p;
+                }
+            });
 
             const cust = Math.ceil(tRev / avgCheck);
             const leads = Math.ceil(cust / conv);
-            const bMin = Math.round(leads * b[0]);
-            const bOpt = Math.round(leads * b[1]);
-            const bReal = Math.round(bOpt * (1 + penalty));
             const gap = tRev - cRev;
-            const lostYear = Math.round((tRev * penalty) * 12);
-
-            // Update UI
-            document.getElementById('res-gap').innerText = `$${gap.toLocaleString()}`;
-            document.getElementById('res-crm').innerText = data.hasCRM === 'yes' ? '✅ Bor' : '❌ Yo\'q';
-            document.getElementById('res-crm').className = `px-3 py-1 rounded-full text-xs font-bold ${data.hasCRM === 'yes' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`;
-            document.getElementById('res-sales').innerText = data.salesTeam === 'yes' ? '✅ Mavjud' : '❌ Yo\'q';
-            document.getElementById('res-sales').className = `px-3 py-1 rounded-full text-xs font-bold ${data.salesTeam === 'yes' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`;
-            document.getElementById('res-conv').innerText = `${data.conversion}%`;
-            document.getElementById('res-cust').innerText = `${cust} ta`;
-            document.getElementById('res-leads').innerText = `${leads} ta`;
-            document.getElementById('res-budget-min').innerText = `$${bMin.toLocaleString()}`;
-            document.getElementById('res-budget-opt').innerText = `$${bOpt.toLocaleString()}`;
-            document.getElementById('res-penalty-pct').innerText = `+${Math.round(penalty * 100)}% jarima`;
-            document.getElementById('res-budget-real').innerText = `$${bReal.toLocaleString()}`;
-            document.getElementById('res-lost').innerText = `$${lostYear.toLocaleString()}`;
-
-            const riskLabel = document.getElementById('risk-label');
-            const riskIcon = document.getElementById('risk-icon');
-            const riskBlob = document.getElementById('risk-blob');
-            if (penalty >= 0.4) {
-                riskLabel.innerText = 'Yuqori'; riskLabel.className = 'text-3xl font-black mb-2 text-red-500';
-                riskIcon.innerText = '🔴'; riskBlob.className = 'absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-20 bg-red-600';
-            } else if (penalty > 0) {
-                riskLabel.innerText = 'O\'rta'; riskLabel.className = 'text-3xl font-black mb-2 text-orange-500';
-                riskIcon.innerText = '🟡'; riskBlob.className = 'absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-20 bg-orange-500';
-            } else {
-                riskLabel.innerText = 'Sog\'lom'; riskLabel.className = 'text-3xl font-black mb-2 text-green-500';
-                riskIcon.innerText = '🟢'; riskBlob.className = 'absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-20 bg-green-500';
+            const bMin = Math.round(leads * platform.min);
+            const bOpt = Math.round(leads * platform.max);
+            const bReal = Math.round(bOpt * (1 + penalty));
+            
+            const roas = (tRev / bReal).toFixed(1);
+            const lostYearly = Math.round((tRev * penalty) * 12);
+            
+            // Risk logic
+            let riskStatus = 'Yaxshi';
+            let riskColor = 'text-green-500';
+            let score = 90 - (penalty * 100);
+            
+            if(penalty >= 0.4) {
+               riskStatus = 'Kritik'; riskColor = 'text-red-500';
+            } else if(penalty > 0) {
+               riskStatus = 'O\'rtacha'; riskColor = 'text-orange-500';
             }
 
-            document.getElementById('quiz-container').classList.add('hidden');
-            document.getElementById('result-dashboard').classList.remove('hidden');
+            // Fill Dashboard
+            document.getElementById('risk-score').innerText = `${Math.max(0, Math.round(score))}%`;
+            document.getElementById('risk-status').innerText = riskStatus;
+            document.getElementById('risk-status').className = `text-xl font-bold ${riskColor}`;
+            document.getElementById('risk-light').className = `absolute top-0 right-0 w-32 h-32 blur-[80px] opacity-20 ${penalty >= 0.4 ? 'bg-red-600' : (penalty > 0 ? 'bg-orange-600' : 'bg-green-600')}`;
+            
+            document.getElementById('dash-gap').innerText = `$${gap.toLocaleString()}`;
+            document.getElementById('dash-roas').innerText = `x${roas}`;
+            document.getElementById('dash-conv').innerText = `${auditData.conversion}%`;
+            document.getElementById('dash-leads').innerText = `${leads.toLocaleString()} ta`;
+            document.getElementById('dash-customers').innerText = `${cust.toLocaleString()} ta`;
+            document.getElementById('dash-cpl').innerText = `$${platform.max.toFixed(2)}`;
+            document.getElementById('dash-budget').innerText = `$${bOpt.toLocaleString()}`;
+            
+            // Set business type name in dashboard if needed
+            const bizName = auditData.industry === 'other' ? auditData.otherIndustry : (QUESTIONS.find(q => q.id === 'industry').options.find(o => o.v === auditData.industry).l);
+            console.log("Business Industry:", bizName);
+
+            document.getElementById('dash-platform').innerText = platform.name + " ADS";
+            document.getElementById('dash-lost').innerText = `$${lostYearly.toLocaleString()}`;
+            document.getElementById('dash-penalty-pct').innerText = `+${Math.round(penalty * 100)}%`;
         }
+
+        function renderCharts() {
+            // Rev Chart
+            new Chart(document.getElementById('revenueChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Hozirgi', 'Maqsad'],
+                    datasets: [{
+                        label: 'Oylik Daromad ($)',
+                        data: [auditData.currentRev, auditData.targetRev],
+                        backgroundColor: ['rgba(6, 182, 212, 0.4)', 'rgba(6, 182, 212, 0.4)'],
+                        borderColor: ['#06b6d4', '#06b6d4'],
+                        borderWidth: 2,
+                        borderRadius: 12
+                    }]
+                },
+                options: { 
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } } }
+                }
+            });
+
+            // Industry Chart
+            const userCPL = auditData.currentCPL || 1.2;
+            const industryKey = auditData.industry || 'other';
+            const industryBenchmarks = BENCHMARKS[industryKey];
+
+            new Chart(document.getElementById('benchmarkChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Insta', 'FB', 'Google', 'TG'],
+                    datasets: [{
+                        label: 'Sizning Narxingiz',
+                        data: [userCPL, userCPL, userCPL, userCPL], 
+                        borderColor: '#00acc1',
+                        backgroundColor: 'rgba(0, 172, 193, 0.1)',
+                        fill: true,
+                        pointRadius: 6,
+                        pointBackgroundColor: '#fff',
+                        borderWidth: 3
+                    }, {
+                        label: 'Soha Narxi',
+                        data: industryBenchmarks,
+                        borderColor: '#94a3b8',
+                        borderDash: [6, 4],
+                        fill: false,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#94a3b8'
+                    }]
+                },
+                options: {
+                    plugins: { 
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { color: '#008899', font: { size: 12, weight: 'bold' } } 
+                        } 
+                    },
+                    scales: { 
+                        y: { 
+                            grid: { color: 'rgba(0,136,153,0.05)' },
+                            ticks: { color: '#008899' }
+                        },
+                        x: {
+                            ticks: { color: '#008899', font: { weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderRoadmap() {
+            const list = document.getElementById('roadmap-list');
+            list.innerHTML = '';
+            const items = [];
+            
+            if(auditData.hasCRM === 'no') items.push({ t: 'CRM o\'rnatish', d: 'Bitrix24 yoki AmoCRM orqali lidlar yo\'qolishini (20%) to\'xtating.', i: 'database' });
+            if(auditData.hasSales === 'no') items.push({ t: 'Sotuvchi yollash', d: 'Shaxsiy vaqtingizni bo\'shatib, konversiyani 15% ga oshiring.', i: 'users' });
+            if(auditData.speedToLead !== 'fast') items.push({ t: 'Speed-to-Lead tezligi', d: 'Javob berish vaqtini 5 daqiqadan kamaytiring, bu sotuvni 7 barobar oshiradi.', i: 'zap' });
+            
+            items.push({ t: 'A/B Test boshlash', d: 'Kichik $100-200 byudjet bilan kreativlarni test qilib, aniq CPL ni biling.', i: 'flask-conical' });
+
+            items.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'flex gap-6 items-start';
+                div.innerHTML = `
+                    <div class="w-12 h-12 glass rounded-2xl flex-shrink-0 flex items-center justify-center font-bold text-cyan-400 font-bold">
+                        ${idx + 1}
+                    </div>
+                    <div>
+                        <h5 class="text-lg font-bold mb-1">${item.t}</h5>
+                        <p class="text-sm text-slate-500 leading-relaxed">${item.d}</p>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
     </script>
 </body>
 </html>
