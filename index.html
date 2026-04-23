@@ -8,8 +8,6 @@
     <!-- Scripts & Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -153,7 +151,6 @@
             header { padding-bottom: 40px !important; }
             header h1 { color: white !important; }
             .gradient-text { color: #00acc1 !important; -webkit-text-fill-color: initial !important; font-weight: 900; }
-            canvas { max-width: 100% !important; height: auto !important; }
         }
     </style>
 </head>
@@ -171,12 +168,7 @@
                 </div>
                 <h1 class="text-2xl font-black tracking-tight text-white">ProAudit</h1>
             </div>
-            <div id="header-actions" class="hidden flex gap-3">
-                <button onclick="downloadPDF()" class="flex items-center gap-2 px-6 py-3 bg-white text-[#00acc1] rounded-xl font-bold btn-hover shadow-lg">
-                    <i data-lucide="download" class="w-5 h-5"></i>
-                    <span>PDF Hisobot</span>
-                </button>
-            </div>
+            <div id="header-actions" class="hidden"></div>
         </header>
 
         <!-- Main Content Area -->
@@ -345,9 +337,6 @@
         </div>
 
     </div>
-
-    <!-- Hidden Report Container for jspdf -->
-    <div id="pdf-container" class="fixed top-[-9999px] left-[-9999px] w-[800px] p-10 bg-slate-900"></div>
 
     <script>
         // Init Lucide
@@ -718,60 +707,6 @@
                 `;
                 list.appendChild(div);
             });
-        }
-
-        async function downloadPDF() {
-            const btn = document.querySelector('#header-actions button');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span>Tayyorlanmoqda...</span>';
-            lucide.createIcons();
-            btn.disabled = true;
-
-            try {
-                const { jsPDF } = window.jspdf;
-                const dashboard = document.getElementById('dashboard');
-                
-                // Temporarily adjust for rendering
-                const originalStyle = dashboard.style.cssText;
-                dashboard.style.maxWidth = '1200px';
-                dashboard.style.padding = '40px';
-                dashboard.style.backgroundColor = '#00acc1';
-
-                const canvas = await html2canvas(dashboard, {
-                    scale: 1.5, // Reduced scale to optimize size (from 2 to 1.5)
-                    useCORS: true,
-                    backgroundColor: '#00acc1',
-                    logging: false,
-                    windowWidth: 1200
-                });
-
-                const imgData = canvas.toDataURL('image/jpeg', 0.85); // Using JPEG with compression
-                const pdf = new jsPDF('p', 'mm', 'a4', true); // Enabled compression
-                const imgProps = pdf.getImageProperties(imgData);
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-                
-                // Open in new tab for online preview
-                const blob = pdf.output('blob');
-                const url = URL.createObjectURL(blob);
-                const pdfWindow = window.open(url, '_blank');
-                
-                // Fallback for some browsers if window.open is blocked
-                if(!pdfWindow) {
-                    pdf.save(`ProAudit_Report_${auditData.userName || '2026'}.pdf`);
-                }
-
-                dashboard.style.cssText = originalStyle;
-            } catch (error) {
-                console.error('PDF generation error:', error);
-                alert('Xatolik yuz berdi. Iltimos yana bir bor urinib ko\'ring.');
-            } finally {
-                btn.innerHTML = originalText;
-                lucide.createIcons();
-                btn.disabled = false;
-            }
         }
 
     </script>
