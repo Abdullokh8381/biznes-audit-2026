@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart, ResponsiveContainer, Tooltip } from "recharts"
 import { Activity, BarChart3, ChevronRight, TrendingUp, ArrowLeft, Database, Users, Zap, FlaskConical } from "lucide-react"
 
@@ -60,6 +60,82 @@ const PLATFORM_DATA: Record<string, { name: string, min: number, max: number }> 
   fb: { name: 'Facebook', min: 1.0, max: 1.8 },
   google: { name: 'Google', min: 2.5, max: 6.0 },
   tg: { name: 'Telegram', min: 0.5, max: 1.0 }
+}
+
+const AnalyzingScreen = ({ onComplete }: { onComplete: () => void }) => {
+  const [progress, setProgress] = useState(0);
+
+  const texts = [
+    "Biznes ma'lumotlari tahlil qilinmoqda...",
+    "Funnel hisob-kitoblari bajarilmoqda...",
+    "Byudjet hisoblanmoqda..."
+  ];
+
+  useEffect(() => {
+    const duration = 3500;
+    const interval = 50;
+    const steps = duration / interval;
+    let currentStep = 0;
+
+    const timer = setInterval(() => {
+      currentStep++;
+      const newProgress = Math.min(Math.round((currentStep / steps) * 100), 100);
+      setProgress(newProgress);
+
+      if (newProgress === 100) {
+        clearInterval(timer);
+        setTimeout(() => {
+          onComplete();
+        }, 400); // Wait a bit at 100%
+      }
+    }, interval);
+    
+    return () => clearInterval(timer);
+  }, [onComplete]);
+
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center p-4 pt-16">
+      <Card className="w-full max-w-sm shadow-xl shadow-primary/5 border-muted/50 p-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-500">
+          <div className="mb-8 relative h-16 w-16 flex items-end justify-center gap-1.5">
+            <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full scale-150"></div>
+            <div className="w-3 bg-red-500 rounded-t-sm shadow-sm animate-[pulse_1s_ease-in-out_infinite]" style={{ height: '40%' }}></div>
+            <div className="w-3 bg-green-500 rounded-t-sm shadow-sm animate-[pulse_1.5s_ease-in-out_infinite]" style={{ height: '70%' }}></div>
+            <div className="w-3 bg-primary rounded-t-sm shadow-sm animate-[pulse_2s_ease-in-out_infinite]" style={{ height: '100%' }}></div>
+          </div>
+          
+          <h2 className="text-xl font-bold mb-8 tracking-tight text-foreground">Natijalar tayyorlanmoqda</h2>
+          
+          <div className="w-full space-y-4 mb-8 text-left px-2">
+            {texts.map((text, i) => {
+              const isActive = progress >= (i * 30);
+              const isChecked = progress > (i * 30 + 15);
+              return (
+                <div key={i} className={`flex items-center gap-3 transition-all duration-500 ${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`}>
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-all duration-500 ${isChecked ? 'bg-muted-foreground/20 text-foreground scale-110' : 'bg-muted text-muted-foreground scale-100'}`}>
+                    {isChecked ? (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    ) : (
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground"></span>
+                    )}
+                  </div>
+                  <span className={`text-sm font-medium transition-colors ${isChecked ? 'text-foreground' : 'text-muted-foreground'}`}>{text}</span>
+                </div>
+              )
+            })}
+          </div>
+          
+          <div className="w-full mt-auto mb-2">
+            <div className="relative h-2 w-full bg-muted overflow-hidden rounded-full mb-3">
+              <div 
+                className="absolute top-0 left-0 h-full bg-foreground transition-all duration-75 ease-linear rounded-full"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+            <div className="text-xs font-bold text-muted-foreground">{progress}%</div>
+          </div>
+      </Card>
+    </div>
+  )
 }
 
 export default function App() {
@@ -252,6 +328,15 @@ export default function App() {
     )
   }
 
+  if (step === QUESTIONS.length) {
+    return (
+      <div className="min-h-screen bg-muted/20 pb-12 flex flex-col">
+        <Header />
+        <AnalyzingScreen onComplete={() => setStep(QUESTIONS.length + 1)} />
+      </div>
+    )
+  }
+
   // Dashboard calculations
   const tRev = auditData.targetRev || 0
   const cRev = auditData.currentRev || 0
@@ -427,12 +512,19 @@ export default function App() {
             <CardFooter>
                <div className="w-full relative">
                  <div className="absolute inset-0 bg-background/20 rounded-xl blur-sm pointer-events-none"></div>
-                 <div className="relative p-4 rounded-xl flex items-center justify-between border border-background/20 backdrop-blur-sm">
-                   <div className="flex items-center gap-2">
+                 <div className="relative p-4 rounded-xl flex items-center justify-between gap-4 border border-background/20 backdrop-blur-sm">
+                   <div className="flex items-center gap-2 shrink-0">
                      <TrendingUp className="w-5 h-5" />
                      <span className="font-bold uppercase tracking-wider text-sm">Platforma</span>
                    </div>
-                   <span className="font-mono text-sm tracking-tighter opacity-90">{platform.name}</span>
+                   <div className="flex flex-col items-end gap-1 text-right opacity-90 tracking-tight leading-loose sm:leading-tight">
+                     {platform.name.split(', ').map((n, idx) => (
+                       <div key={idx} className="flex items-center gap-2">
+                         <span className="w-1.5 h-1.5 rounded-full bg-primary-foreground/50"></span>
+                         <span className="font-medium">{n}</span>
+                       </div>
+                     ))}
+                   </div>
                  </div>
                </div>
             </CardFooter>
@@ -450,9 +542,17 @@ export default function App() {
               <div className="h-[250px] w-full">
                 <ChartContainer config={{ daromad: { label: "Daromad ($)", color: "hsl(var(--primary))" } }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <BarChart data={revenueData} margin={{ top: 10, right: 10, left: 15, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
                       <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        width={60} 
+                        tickFormatter={(value) => `$${value.toLocaleString()}`} 
+                        fontSize={12}
+                        className="text-muted-foreground"
+                      />
                       <ChartTooltip content={<ChartTooltipContent />} />
                       <Bar dataKey="daromad" fill="var(--color-daromad)" radius={[4, 4, 0, 0]} />
                     </BarChart>
